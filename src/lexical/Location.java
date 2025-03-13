@@ -4,7 +4,7 @@ import java.nio.CharBuffer;
 
 public record Location(int line, int column) {
 
-    public final Location atInd(CharBuffer source, int ind) {
+    public static Location atIndex(CharBuffer source, int ind) {
         int line = 1;
         int column = 1;
         for (int i = 0; i < ind; ++i) {
@@ -15,5 +15,10 @@ public record Location(int line, int column) {
             column += 1;
         }
         return new Location(line, column);
+    }
+
+    @Override
+    public String toString() {
+        return "[" + line + ":" + column + "]";
     }
 }

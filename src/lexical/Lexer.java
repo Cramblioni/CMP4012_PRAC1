@@ -15,51 +15,51 @@ public class Lexer {
         return index >= source.length();
     }
 
-    private char consume() throws Exception {
-        if (atEnd()) throw new Exception("Unexpected EOI");
+    private char consume() throws LexingError {
+        if (atEnd()) throw new LexingError(Location.atIndex(source, index), "Unexpected EOI");
         final char ret = source.get(index);
         index += 1;
         return ret;
     }
 
-    private char peek() throws Exception {
-        if (atEnd()) throw new Exception("Unexpected EOI");
+    private char peek() throws LexingError {
+        if (atEnd()) throw new LexingError(Location.atIndex(source, index),"Unexpected EOI");
         return source.get(index);
     }
 
-    private void skipWhitespace() throws Exception {
+    private void skipWhitespace() throws LexingError {
         while (" \t\n\r".indexOf(peek()) != -1) {
             consume();
         }
     }
 
-    private Token consumeNumber() throws Exception {
+    private Token consumeNumber() throws LexingError {
         assert Character.isDigit(peek());
         final int start = index;
-        while (Character.isDigit(peek())) {
+        while (!atEnd() && Character.isDigit(peek())) {
             consume();
         };
         if (peek() == '.') {
             do {
                 consume();
-            } while ( Character.isDigit(peek()) );
+            } while ( !atEnd() && Character.isDigit(peek()) );
         }
 
         final int end = index;
         return new Token(Tag.Number, start, end);
     }
-    private Token consumeIdentifier() throws Exception {
+    private Token consumeIdentifier() throws LexingError {
         assert Character.isLetter(peek());
 
         final int start = index;
         do {
             consume();
-        } while (Character.isLetterOrDigit(peek()));
+        } while (!atEnd() && Character.isLetterOrDigit(peek()));
         final int end = index;
         return new Token(Tag.Identifier, start, end);
     }
 
-    private Token consumeString() throws Exception {
+    private Token consumeString() throws LexingError {
         assert peek() == '"';
 
         final int start = index;
@@ -74,14 +74,14 @@ public class Lexer {
         return new Token(Tag.String, start, end);
     }
 
-    private Token consumeToken(Tag tag) throws Exception {
+    private Token consumeToken(Tag tag) throws LexingError {
         final int start = index;
         consume();
         final int end = index;
         return new Token(tag, start, end);
     }
 
-    public Token pullToken() throws Exception {
+    public Token pullToken() throws LexingError {
         skipWhitespace();
         if (Character.isDigit(peek())) {
             return consumeNumber();
@@ -102,7 +102,7 @@ public class Lexer {
             case '=','!','<','>' -> handleComparison();
             case '"' -> consumeString();
 
-            default -> throw new Exception("unrecognised token at " + index);
+            default -> throw new LexingError(Location.atIndex(source,index),"unrecognised token at " + index);
         };
     }
 
@@ -134,7 +134,7 @@ public class Lexer {
         }
         return base;
     }
-    private Token handleComparison() throws Exception {
+    private Token handleComparison() throws LexingError {
         final int start = index;
         final char head = consume();
         final boolean has_tail = peek() == '=';
@@ -148,7 +148,7 @@ public class Lexer {
             case '>' -> new Token(has_tail ? Tag.GreaterEqual : Tag.Greater, start, end);
             case '<' -> new Token(has_tail ? Tag.LesserEqual : Tag.Less, start, end);
             case '!' -> new Token(has_tail ? Tag.NotEqual : Tag.Not, start, end);
-            default -> throw new Exception("Invalid comparison operator");
+            default -> throw new LexingError(Location.atIndex(source, index),"Invalid comparison operator");
         };
     }
 }
