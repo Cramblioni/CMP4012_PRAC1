@@ -1,0 +1,50 @@
+# University Project Language
+
+Grammar:
+```EBNF
+<program> ::= <declaration>+;
+
+<declaration> ::= <function declaration>
+                | <variable declaration>;
+
+<variable declaration> ::= "var" <identifier> ["=" <expression>] ";";
+
+<function declaration> ::= "fn" <identifier> <function arguments> <block>;
+
+<function arguments> ::= "(" [<identifier> ["," <identifier>]*] ")";
+
+<block> ::= "{" <statement>* "}";
+
+<statement> ::= <location> "=" <expression> ";"
+              | "while" <expression> <block>
+              | "if" <expression> <block> ["else" <block>]
+              | <expression>;
+
+<expression> ::= <expression 2> "==" <expression 2>
+               | <expression 2> "!=" <expression 2>
+               | <expression 2> ">=" <expression 2>
+               | <expression 2> "<=" <expression 2>
+               | <expression 2> ">" <expression 2>
+               | <expression 2> "<" <expression 2>
+               | <expression 2>;
+
+<expression 2> ::= <expression 3> "+" <expression 2>
+               | <expression 3> "-" <expression 2>
+               | <expression 3>;
+
+<expression 3> ::= <expression 4> "*" <expression 3>
+                 | <expression 4> "/" <expression 3>
+                 | <expression 4>;
+
+<expression 4> ::= <location>
+                 | <literal>
+                 | "(" <expression> ")";
+
+<location> ::= <location> "." <identifier>
+             | <location> "[" <expression> "]"
+             | <identifier>;
+
+<identifier> ::= Internal Definition ;
+<literal> ::= Internal Definition ;
+```
+

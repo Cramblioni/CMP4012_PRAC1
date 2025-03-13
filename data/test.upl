@@ -1,0 +1,18 @@
+"test"
+fn double(x) {
+    return x + x;
+}
+fn fibonacci(x) {
+    var a = 0;
+    var b = 1;
+    while x > 0 {
+        b = a + b;
+        a = b - a;
+    }
+    return a;
+}
+
+fn main() {
+    print("the result is");
+    print(double(fibonacci(5)));
+}
