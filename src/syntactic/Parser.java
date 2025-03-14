@@ -43,13 +43,13 @@ public class Parser {
             return Optional.empty();
         }
         return Optional.of(new NumberNode(Location.atIndex(source, head.start()), value));
-    };
+    }
     public Optional<IdentifierNode> pullIdentifier() {
         final Token head = peek();
         if (head.tag() != Tag.Identifier) return Optional.empty();
         final CharBuffer identifier = source.subSequence(head.start(), head.end());
         return Optional.of(new IdentifierNode(Location.atIndex(source, head.start()), identifier));
-    };
+    }
     public Optional<AstNode> pullLocation() {
         // TODO: implement `head[index]` syntax
         Optional<IdentifierNode> head_opt = pullIdentifier();

@@ -38,7 +38,7 @@ public class Lexer {
         final int start = index;
         while (!atEnd() && Character.isDigit(peek())) {
             consume();
-        };
+        }
         if (peek() == '.') {
             do {
                 consume();
