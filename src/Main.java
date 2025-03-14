@@ -1,10 +1,13 @@
 import lexical.Lexer;
+import lexical.LexingError;
+import lexical.Location;
 import lexical.Token;
 
 import java.lang.System;
 import java.nio.CharBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -16,17 +19,23 @@ public class Main {
 
         System.out.println(source);
 
-        Lexer lexer = new Lexer(source);
-        try {
-            while (!lexer.atEnd()) {
-                Token token = lexer.pullToken();
-                System.out.printf("'%s' %s\n",
-                        source.slice(token.start(), token.end() - token.start()),
-                        token.tag()
-                );
-            }
-        } catch(Exception e) {
-            System.out.println(e.getMessage());
+        ArrayList<Token> tokens = tokeniseFile(source);
+        for (Token token : tokens) {
+            System.out.printf("%s\t'%s' %s\n",
+                    Location.atIndex(source, token.start()),
+                    source.subSequence(token.start(), token.end()).toString(),
+                    token.tag()
+            );
         }
+    }
+
+    private static ArrayList<Token> tokeniseFile(CharBuffer source) throws LexingError {
+        Lexer lexer = new Lexer(source);
+        ArrayList<Token> tokens = new ArrayList<>();
+        while (!lexer.atEnd()) {
+            Token token = lexer.pullToken();
+            tokens.add(token);
+        }
+        return tokens;
     }
 }
