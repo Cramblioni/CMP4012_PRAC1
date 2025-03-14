@@ -13,6 +13,8 @@ public enum Tag {
     CloseParenthesis,
     OpenBrace,
     CloseBrace,
+    OpenBracket,
+    CloseBracket,
     Assign,
 
     True,
@@ -20,6 +22,8 @@ public enum Tag {
     Identifier,
     Number,
     String,
+
+    Dot,
 
     Plus,
     Minus,
