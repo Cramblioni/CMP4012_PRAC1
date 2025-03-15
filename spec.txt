@@ -5,13 +5,16 @@ Grammar:
 <program> ::= <declaration>+;
 
 <declaration> ::= <function declaration>
-                | <variable declaration>;
+                | <variable declaration>
+                | <import>;
 
 <variable declaration> ::= "var" <identifier> ["=" <expression>] ";";
 
 <function declaration> ::= "fn" <identifier> <function arguments> <block>;
 
 <function arguments> ::= "(" [<identifier> ["," <identifier>]*] ")";
+
+<import> ::= "import" <string literal>  <identifier>;
 
 <block> ::= "{" <statement>* "}";
 
@@ -38,7 +41,9 @@ Grammar:
 
 <expression 4> ::= <location>
                  | <literal>
-                 | "(" <expression> ")";
+                 | "(" <expression> ")"
+                 | "!" <expression 4>
+                 | <location> "(" [<expression> ["," <expression>]*] ")";
 
 <location> ::= <location> "." <identifier>
              | <location> "[" <expression> "]"
@@ -48,3 +53,13 @@ Grammar:
 <literal> ::= Internal Definition ;
 ```
 
+The top-level contains a set of order-independent declarations. A function named
+`main` must be provided as an entrypoint for the interpreter.
+
+Import statements store the top-level declarations of a source file in a variable.
+Similar to Zig's `@import` builtin. The statement `import "foo.upl" foo` works in
+a similar way to the zig `const foo = @import("foo.zig")`.
+Imports are not singleton, unlike Zig and Python. The value stored in the provided
+variable is an object whose fields are the declarations from the specified file.
+This does not handle cyclic imports. Cyclic imports will result in unbound
+recursion.
