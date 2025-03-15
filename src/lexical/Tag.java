@@ -7,6 +7,7 @@ public enum Tag {
     ElseKeyword,
     WhileKeyword,
     ReturnKeyword,
+    ImportKeyword,
 
     Semicolon,
     OpenParenthesis,

@@ -135,6 +135,9 @@ public class Lexer {
         if (identifier.compareTo(CharBuffer.wrap("else")) == 0) {
             return new Token(Tag.ElseKeyword, base.start(),base.end());
         }
+        if (identifier.compareTo(CharBuffer.wrap("import")) == 0) {
+            return new Token(Tag.ImportKeyword, base.start(),base.end());
+        }
         return base;
     }
     private Token handleComparison() throws LexingError {
