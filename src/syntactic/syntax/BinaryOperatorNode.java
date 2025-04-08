@@ -3,12 +3,12 @@ package syntactic.syntax;
 import lexical.Location;
 import lexical.Tag;
 
-public class OperatorNode extends AstNode {
+public class BinaryOperatorNode extends AstNode {
     Tag operator;
     AstNode lhs;
     AstNode rhs;
 
-    public OperatorNode(Location location, Tag operator, AstNode lhs, AstNode rhs) {
+    public BinaryOperatorNode(Location location, Tag operator, AstNode lhs, AstNode rhs) {
         super(location);
         this.operator = operator;
         this.lhs = lhs;
@@ -17,6 +17,6 @@ public class OperatorNode extends AstNode {
 
     @Override
     public <T> T visit(Visitor<T> visitor) {
-        return visitor.visitOperator(this);
+        return visitor.visitBinaryOperator(this);
     }
 }
