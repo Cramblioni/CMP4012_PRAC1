@@ -7,6 +7,7 @@ import syntactic.syntax.*;
 
 import java.nio.CharBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 // This is a recursive descent parser
 //      backtracking is implemented by branching the parser and then joining
@@ -134,5 +135,61 @@ public class Parser {
         }
         assert accumulator != null;
         throw accumulator;
+    }
+
+    public AstNode pullExpression3() throws ParserError {
+        Parser branch = branch();
+        AstNode accumulate = branch.pullExpression4();
+        if (branch.peek().tag() == Tag.Star || branch.peek().tag() == Tag.Slash) {
+            Token token = branch.consume();
+            AstNode rhs = pullExpression3();
+            accumulate = new BinaryOperatorNode(
+                    Location.atIndex(source, token.start()),
+                    token.tag(),
+                    accumulate,
+                    rhs
+            );
+        }
+        join(branch);
+        return accumulate;
+    }
+
+    public AstNode pullExpression2() throws ParserError {
+        Parser branch = branch();
+        AstNode accumulate = branch.pullExpression3();
+        if (branch.peek().tag() == Tag.Plus || branch.peek().tag() == Tag.Minus) {
+            Token token = branch.consume();
+            AstNode rhs = pullExpression2();
+            accumulate = new BinaryOperatorNode(
+                    Location.atIndex(source, token.start()),
+                    token.tag(),
+                    accumulate,
+                    rhs
+            );
+        }
+        join(branch);
+        return accumulate;
+    }
+
+    public AstNode pullExpression() throws ParserError {
+        final Tag[] Operators = {
+                Tag.Equal, Tag.NotEqual,
+                Tag.GreaterEqual, Tag.Greater,
+                Tag.LesserEqual, Tag.Less,
+        };
+        Parser branch = branch();
+        AstNode accumulate = branch.pullExpression2();
+        if (Arrays.asList(Operators).contains(branch.peek().tag())) {
+            Token token = branch.consume();
+            AstNode rhs = pullExpression2();
+            accumulate = new BinaryOperatorNode(
+                    Location.atIndex(source, token.start()),
+                    token.tag(),
+                    accumulate,
+                    rhs
+            );
+        }
+        join(branch);
+        return accumulate;
     }
 }
