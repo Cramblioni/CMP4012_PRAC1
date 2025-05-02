@@ -103,9 +103,20 @@ public class Parser {
     }
 
     public AstNode pullLocation() throws ParserError {
+        Parser branch = branch();
+        AstNode accumulator = branch.pullIdentifier();
         // TODO: Indexing
-        // TODO: Accessing
-        return pullIdentifier();
+        while (branch.peek().tag() == Tag.Dot) {
+            Token dot = consume();
+            accumulator = new BinaryOperatorNode(
+                    Location.atIndex(source, dot.start()),
+                    dot.tag(),
+                    accumulator,
+                    pullIdentifier()
+            );
+        }
+        join(branch);
+        return accumulator;
     }
 
     public AstNode pullExpression4() throws ParserError {
@@ -122,8 +133,26 @@ public class Parser {
             accumulator = ParserError.accumulate(accumulator, e);
         }
 
-        // TODO: Paren
-        // TODO: Negation
+        if (peek().tag() == Tag.OpenParenthesis) {
+            try {
+                Parser branch = branch();
+                branch.consume();
+                final AstNode inner = branch.pullExpression();
+                branch.noEOF();
+                final Token closing = branch.consume();
+                if (closing.tag() != Tag.CloseParenthesis) {
+                    throw new ParserError(
+                            Location.atIndex(source, closing.start()),
+                            "Expected closing parenthesis `)`"
+                    );
+                }
+                join(branch);
+                return inner;
+            } catch (ParserError e) {
+                accumulator = ParserError.accumulate(accumulator, e);
+            }
+        }
+
         if (peek().tag() == Tag.Not) {
             Parser branch = branch();
             branch.consume();
