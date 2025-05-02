@@ -5,7 +5,7 @@ import lexical.Location;
 import java.nio.CharBuffer;
 
 public class IdentifierNode extends AstNode {
-    CharBuffer identifier;
+    public CharBuffer identifier;
 
     public IdentifierNode(Location location, CharBuffer text) {
         super(location);

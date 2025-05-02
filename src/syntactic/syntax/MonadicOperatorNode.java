@@ -4,8 +4,8 @@ import lexical.Location;
 import lexical.Tag;
 
 public class MonadicOperatorNode extends AstNode {
-    Tag operator;
-    AstNode rhs;
+    public Tag operator;
+    public AstNode rhs;
 
     public MonadicOperatorNode(Location location, Tag operator, AstNode rhs) {
         super(location);

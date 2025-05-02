@@ -5,8 +5,8 @@ import lexical.Location;
 import java.nio.CharBuffer;
 
 public class AccessNode extends AstNode {
-    AstNode source;
-    CharBuffer field;
+    public AstNode source;
+    public CharBuffer field;
 
     public AccessNode(Location location, AstNode source, CharBuffer field) {
         super(location);

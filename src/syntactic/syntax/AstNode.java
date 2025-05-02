@@ -3,7 +3,7 @@ package syntactic.syntax;
 import lexical.Location;
 
 public abstract class AstNode {
-    Location location;
+    public Location location;
 
     public AstNode(Location location) {
         this.location = location;
