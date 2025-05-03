@@ -102,6 +102,7 @@ public class Parser {
         return new IdentifierNode(loc, source.subSequence(tok.start(), tok.end()));
     }
 
+    // Expressions and Expression Components
     public AstNode pullLocation() throws ParserError {
         Parser branch = branch();
         AstNode accumulator = branch.pullIdentifier();
@@ -220,5 +221,41 @@ public class Parser {
         }
         join(branch);
         return accumulate;
+    }
+
+    // Statements and Definitions
+    // Statements should not consume the trailing `;`.
+    // This will be handled via `pullStatement` and `pullDeclaration`
+
+    public AstNode pullVariableDeclaration() throws ParserError {
+        Parser branch = branch();
+        if (branch.peek().tag() != Tag.VarKeyword) {
+            throw new ParserError(
+                    Location.atIndex(source, branch.peek().start()),
+                    "Expected `var` keyword"
+            );
+        }
+        final int start = branch.consume().start();
+        final Token identifier = branch.consume();
+        if (identifier.tag() != Tag.Identifier) {
+            throw new ParserError(
+                    Location.atIndex(source, identifier.start()),
+                    "Expected an identifier"
+            );
+        }
+        if (branch.peek().tag() != Tag.Assign) {
+            join(branch);
+            return new VariableDeclarationNode(
+                    Location.atIndex(source, start),
+                    source.slice(identifier.start(), identifier.end())
+            );
+        }
+        consume();
+        final AstNode value = branch.pullExpression();
+        return new VariableDeclarationAndAssignmentNode(
+                Location.atIndex(source, start),
+                source.slice(identifier.start(), identifier.end()),
+                value
+        );
     }
 }
