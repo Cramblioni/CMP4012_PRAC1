@@ -285,4 +285,38 @@ public class Parser {
                 value
         );
     }
+
+    public AstNode pullImport() throws ParserError {
+        Parser branch = branch();
+        branch.noEOF();
+        final Token start = branch.consume();
+        if (start.tag() != Tag.ImportKeyword) {
+            throw new ParserError(
+                    Location.atIndex(source, start.start()),
+                    "Expected `Import`"
+            );
+        }
+        branch.noEOF();
+        final Token source = consume();
+        if (source.tag() != Tag.String) {
+            throw new ParserError(
+                    Location.atIndex(this.source, source.start()),
+                    "Expected string literal"
+            );
+        }
+        branch.noEOF();
+        final Token identifier = consume();
+        if (identifier.tag() != Tag.String) {
+            throw new ParserError(
+                    Location.atIndex(this.source, identifier.start()),
+                    "Expected Identifier"
+            );
+        }
+        join(branch);
+        return new ImportNode(
+                Location.atIndex(this.source, start.start()),
+                this.source.slice(source.start(),source.end()),
+                this.source.slice(identifier.start(),identifier.end())
+        );
+    }
 }
