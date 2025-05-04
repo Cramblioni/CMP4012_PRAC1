@@ -229,6 +229,7 @@ public class Parser {
 
     public AstNode pullVariableDeclaration() throws ParserError {
         Parser branch = branch();
+        branch.noEOF();
         if (branch.peek().tag() != Tag.VarKeyword) {
             throw new ParserError(
                     Location.atIndex(source, branch.peek().start()),
@@ -236,6 +237,7 @@ public class Parser {
             );
         }
         final int start = branch.consume().start();
+        branch.noEOF();
         final Token identifier = branch.consume();
         if (identifier.tag() != Tag.Identifier) {
             throw new ParserError(
@@ -243,6 +245,7 @@ public class Parser {
                     "Expected an identifier"
             );
         }
+        branch.noEOF();
         if (branch.peek().tag() != Tag.Assign) {
             join(branch);
             return new VariableDeclarationNode(
@@ -251,10 +254,34 @@ public class Parser {
             );
         }
         consume();
+        branch.noEOF();
         final AstNode value = branch.pullExpression();
+        join(branch);
         return new VariableDeclarationAndAssignmentNode(
                 Location.atIndex(source, start),
                 source.slice(identifier.start(), identifier.end()),
+                value
+        );
+    }
+
+    public AstNode pullAssignment() throws ParserError {
+        Parser branch = branch();
+        branch.noEOF();
+        final AstNode location = branch.pullLocation();
+        branch.noEOF();
+        if (branch.peek().tag() != Tag.Assign) {
+            throw new ParserError(
+                    Location.atIndex(source, branch.peek().start()),
+                    "Expected `=`"
+            );
+        }
+        final Token focus = branch.consume();
+        branch.noEOF();
+        final AstNode value = branch.pullExpression();
+        join(branch);
+        return new AssignmentNode(
+                Location.atIndex(source, focus.start()),
+                location,
                 value
         );
     }
