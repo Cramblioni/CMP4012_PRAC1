@@ -8,6 +8,8 @@ import syntactic.syntax.*;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 // This is a recursive descent parser
 //      backtracking is implemented by branching the parser and then joining
@@ -318,5 +320,136 @@ public class Parser {
                 this.source.slice(source.start(),source.end()),
                 this.source.slice(identifier.start(),identifier.end())
         );
+    }
+
+    public  AstNode pullIf() throws ParserError {
+        Parser branch = branch();
+        branch.noEOF();
+        final Token start = branch.consume();
+        if (start.tag() != Tag.IfKeyword) {
+            throw new ParserError(
+                    Location.atIndex(source, start.start()),
+                    "Expected `if` keyword"
+            );
+        }
+        branch.noEOF();
+        final AstNode condition = branch.pullExpression();
+        branch.noEOF();
+        final AstNode body = branch.pullBlock();
+        if (branch.peek().tag() != Tag.ElseKeyword) {
+            join(branch);
+            return new IfNode(
+                    Location.atIndex(source, start.start()),
+                    condition,
+                    body
+            );
+        }
+        branch.consume();
+        branch.noEOF();
+        final AstNode elseCase = branch.pullBlock();
+        join(branch);
+        return new IfElseNode(
+                Location.atIndex(source, start.start()),
+                condition,
+                body,
+                elseCase
+        );
+    }
+
+    public AstNode pullBlock() throws ParserError {
+        Parser branch = branch();
+        branch.noEOF();
+        List<AstNode> statements = Collections.emptyList();
+        final Token start = branch.consume();
+        if (start.tag() != Tag.OpenBrace) {
+            throw new ParserError(
+                    Location.atIndex(source, start.start()),
+                    "Expected {"
+            );
+        }
+        // TODO: parse statements :)
+        // while (branch.peek().tag() != Tag.CloseBrace) { ... }
+        branch.consume();
+        join(branch);
+        return new BlockNode(
+                Location.atIndex(source, start.start()),
+                statements.toArray(new AstNode[0])
+        );
+    }
+    public AstNode pullDeclaration() throws ParserError {
+        Parser branch = branch();
+        AstNode declaration = null;
+        ParserError accumulator = null;
+        // TODO: Function
+
+        try {
+            declaration = branch.pullVariableDeclaration();
+        } catch (ParserError e) {
+            accumulator = ParserError.accumulate(accumulator, e);
+        }
+
+        try {
+            declaration = branch.pullImport();
+        } catch (ParserError e) {
+            accumulator = ParserError.accumulate(accumulator, e);
+        }
+
+        branch.noEOF();
+        if (branch.peek().tag() != Tag.Semicolon) {
+            throw new ParserError(
+                    Location.atIndex(source,branch.consume().start()),
+                    "Expected `;`"
+            );
+        }
+        if (accumulator != null) {
+            throw accumulator;
+        }
+        branch.consume();
+        join(branch);
+        return declaration;
+    }
+
+    public AstNode pullStatement() throws ParserError {
+        ParserError accumulator = null;
+        try {
+            return pullDeclaration();
+        } catch (ParserError e) {
+            accumulator = ParserError.accumulate(accumulator, e);
+        }
+        Parser branch = branch();
+        // TODO: While
+        AstNode statement = null;
+        try {
+            statement = pullAssignment();
+        } catch (ParserError e) {
+            accumulator = ParserError.accumulate(accumulator, e);
+        }
+        try {
+            if (statement != null) {
+                statement = branch.pullIf();
+            }
+        } catch (ParserError e) {
+            accumulator = ParserError.accumulate(accumulator, e);
+        }
+        try {
+            if (statement != null) {
+                statement = branch.pullExpression();
+            }
+        } catch (ParserError e) {
+            accumulator = ParserError.accumulate(accumulator, e);
+        }
+        branch.noEOF();
+        if (branch.peek().tag() != Tag.Semicolon) {
+            throw new ParserError(
+                    Location.atIndex(source,branch.consume().start()),
+                    "Expected `;`"
+            );
+        }
+        if (accumulator != null) {
+            throw accumulator;
+        }
+        branch.consume();
+        join(branch);
+        return statement;
     }
 }
