@@ -11,7 +11,7 @@ public class IdentifierNode extends AstNode {
         super(location);
         this.identifier = text;
     }
-    public <T> T visit(Visitor<T> visitor) {
+    public <T, E extends Throwable> T visit(Visitor<T, E> visitor) throws E {
         return visitor.visitIdentifier(this);
     }
 }

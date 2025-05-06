@@ -9,6 +9,6 @@ public abstract class AstNode {
         this.location = location;
     }
 
-    public abstract <T> T visit(Visitor<T> visitor);
+    public abstract <T, E extends Throwable> T visit(Visitor<T, E> visitor) throws E;
 }
 
