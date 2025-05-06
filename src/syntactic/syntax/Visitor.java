@@ -16,4 +16,5 @@ public interface Visitor<T, E extends Throwable> {
     T visitWhile(WhileNode node) throws E;
     T visitBlock(BlockNode node) throws E;
     T visitAssignment(AssignmentNode node) throws E;
+    T visitBoolean(BooleanNode node) throws E;
 }
