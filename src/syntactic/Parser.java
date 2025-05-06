@@ -367,8 +367,11 @@ public class Parser {
                     "Expected {"
             );
         }
-        // TODO: parse statements :)
-        // while (branch.peek().tag() != Tag.CloseBrace) { ... }
+        branch.noEOF();
+        while (branch.peek().tag() != Tag.CloseBrace) {
+            branch.noEOF();
+            statements.add(branch.pullStatement());
+        }
         branch.consume();
         join(branch);
         return new BlockNode(
