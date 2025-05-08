@@ -8,7 +8,9 @@ public class StringNode extends AstNode {
         super(location);
         this.contents = contents;
     }
-    public <T> T visit(Visitor<T> visitor) {
+
+    @Override
+    public <T, E extends Throwable> T visit(Visitor<T, E> visitor) throws E {
         return visitor.visitString(this);
     }
 }

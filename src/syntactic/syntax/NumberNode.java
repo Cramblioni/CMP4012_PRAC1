@@ -8,7 +8,9 @@ public class NumberNode extends AstNode {
         super(location);
         number = value;
     }
-    public <T> T visit(Visitor<T> visitor) {
+
+    @Override
+    public <T, E extends Throwable> T visit(Visitor<T, E> visitor) throws E {
         return visitor.visitNumber(this);
     }
 }

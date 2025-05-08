@@ -22,10 +22,7 @@ public class BooleanValue extends BaseValue {
     }
     @Override
     public BaseValue negate() throws DataError {
-        if (other instanceof BooleanValue val) {
-            return new BooleanValue( !this.value );
-        }
-        throw new NoImplementationError();
+        return new BooleanValue(!value);
     }
 
     @Override

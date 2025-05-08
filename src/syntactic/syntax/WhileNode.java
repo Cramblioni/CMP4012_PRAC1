@@ -13,7 +13,7 @@ public class WhileNode extends AstNode {
     }
 
     @Override
-    public <T> T visit(Visitor<T> visitor) {
+    public <T, E extends Throwable> T visit(Visitor<T, E> visitor) throws E {
         return visitor.visitWhile(this);
     }
 }
