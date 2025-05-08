@@ -8,8 +8,6 @@ import syntactic.syntax.*;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 // This is a recursive descent parser
 //      backtracking is implemented by branching the parser and then joining
@@ -375,7 +373,7 @@ public class Parser {
     public AstNode pullBlock() throws ParserError {
         Parser branch = branch();
         branch.noEOF();
-        List<AstNode> statements = Collections.emptyList();
+        ArrayList<AstNode> statements = new ArrayList<AstNode>();
         final Token start = branch.consume();
         if (start.tag() != Tag.OpenBrace) {
             throw new ParserError(
