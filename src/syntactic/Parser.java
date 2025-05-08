@@ -123,7 +123,6 @@ public class Parser {
     public AstNode pullLocation() throws ParserError {
         Parser branch = branch();
         AstNode accumulator = branch.pullIdentifier();
-        // TODO: Indexing
         while (branch.peek().tag() == Tag.Dot) {
             Token dot = consume();
             accumulator = new BinaryOperatorNode(
@@ -148,7 +147,6 @@ public class Parser {
     public AstNode pullExpression4() throws ParserError {
         ParserError accumulator = null;
 
-        // TODO: Invocation
         try {
             Parser branch = branch();
             AstNode location = branch.pullLocation();
@@ -393,6 +391,47 @@ public class Parser {
         );
     }
 
+    public AstNode pullFunctionDefinition() throws ParserError {
+        Parser branch = branch();
+        final Token head = branch.consume();
+        if (head.tag() != Tag.FnKeyword) {
+            throw new ParserError(
+                    Location.atIndex(source, head.start()),
+                    "Expected `fn`"
+            );
+        }
+        branch.consume();
+        final CharBuffer name = branch.pullIdentifier().identifier;
+        if (branch.peek().tag() != Tag.OpenParenthesis) {
+            throw new ParserError(
+                    Location.atIndex(source, branch.peek().start()),
+                    "Expected `(`"
+            );
+        }
+        ArrayList<CharBuffer> arguments = new ArrayList<CharBuffer>();
+        do {
+            if (branch.peek().tag() == Tag.CloseParenthesis) {
+                break;
+            }
+            arguments.add(branch.pullIdentifier().identifier);
+        } while (shouldContinueFuncArgs());
+        if (branch.peek().tag() != Tag.CloseParenthesis) {
+            throw new ParserError(
+                    Location.atIndex(source, branch.peek().start()),
+                    "Expected `)` after function arguments"
+            );
+        }
+        branch.consume();
+        final AstNode body = branch.pullBlock();
+        join(branch);
+        return new FunctionNode(
+                Location.atIndex(source, head.start()),
+                name,
+                arguments.toArray(new CharBuffer[0]),
+                body
+        );
+    }
+
     public AstNode pullBlock() throws ParserError {
         Parser branch = branch();
         ArrayList<AstNode> statements = new ArrayList<AstNode>();
@@ -417,7 +456,6 @@ public class Parser {
         Parser branch = branch();
         AstNode declaration = null;
         ParserError accumulator = null;
-        // TODO: Function
 
         try {
             declaration = branch.pullVariableDeclaration();
@@ -426,7 +464,17 @@ public class Parser {
         }
 
         try {
-            declaration = branch.pullImport();
+            if (declaration != null) {
+                declaration = branch.pullImport();
+            }
+        } catch (ParserError e) {
+            accumulator = ParserError.accumulate(accumulator, e);
+        }
+
+        try {
+            if (declaration != null) {
+                declaration = branch.pullFunctionDefinition();
+            }
         } catch (ParserError e) {
             accumulator = ParserError.accumulate(accumulator, e);
         }
