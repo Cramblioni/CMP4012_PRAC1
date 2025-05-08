@@ -95,18 +95,18 @@ public class Parser {
         );
     }
     public AstNode pullLiteral() throws ParserError {
-        ParserError error = null;
+        ParserError accumulator = null;
 
         try {return pullNumber();}
-        catch (ParserError e) {error = e;}
+        catch (ParserError e) {accumulator = ParserError.accumulate(accumulator, e);}
         try {return pullString();}
-        catch (ParserError e) {
-            assert true; // Exception gets re-raised later
-        }
+        catch (ParserError e) {accumulator = ParserError.accumulate(accumulator, e);}
+        try {return pullBoolean();}
+        catch (ParserError e) {accumulator = ParserError.accumulate(accumulator, e);}
 
         throw  new ParserError(
-                error.pos,
-                "Expected literal (either number or string)"
+                accumulator.pos,
+                "Expected literal (either number or string or boolean)"
         );
     }
 
