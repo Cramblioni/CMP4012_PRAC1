@@ -432,6 +432,26 @@ public class Parser {
         );
     }
 
+    public AstNode pullWhile() throws ParserError {
+        Parser branch = branch();
+        final Token head = branch.consume();
+        if (head.tag() != Tag.WhileKeyword) {
+            throw new ParserError(
+                    Location.atIndex(source, head.start()),
+                    "Expected `while`"
+            );
+        }
+        final AstNode condition = branch.pullExpression();
+        final AstNode body = branch.pullBlock();
+
+        join(branch);
+        return new WhileNode(
+                Location.atIndex(source, head.start()),
+                condition,
+                body
+        );
+    }
+
     public AstNode pullBlock() throws ParserError {
         Parser branch = branch();
         ArrayList<AstNode> statements = new ArrayList<AstNode>();
@@ -511,6 +531,13 @@ public class Parser {
         try {
             if (statement != null) {
                 statement = branch.pullIf();
+            }
+        } catch (ParserError e) {
+            accumulator = ParserError.accumulate(accumulator, e);
+        }
+        try {
+            if (statement != null) {
+                statement = branch.pullWhile();
             }
         } catch (ParserError e) {
             accumulator = ParserError.accumulate(accumulator, e);
