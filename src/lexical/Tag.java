@@ -14,8 +14,6 @@ public enum Tag {
     CloseParenthesis,
     OpenBrace,
     CloseBrace,
-    OpenBracket,
-    CloseBracket,
     Assign,
 
     True,

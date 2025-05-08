@@ -102,8 +102,6 @@ public class Lexer {
             case '=','!','<','>' -> handleComparison();
             case '"' -> consumeString();
             case '.' -> consumeToken(Tag.Dot);
-            case '[' -> consumeToken(Tag.OpenBracket);
-            case ']' -> consumeToken(Tag.CloseBracket);
 
             default -> throw new LexingError(Location.atIndex(source,index),"unrecognised token at " + index);
         };
