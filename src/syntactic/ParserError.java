@@ -3,8 +3,8 @@ package syntactic;
 import lexical.Location;
 
 public class ParserError extends Exception {
-    Location pos;
-    boolean eof = false;
+    public Location pos;
+    public boolean eof = false;
     public  ParserError(Location pos, String message) {
         super(message);
         this.pos = pos;
