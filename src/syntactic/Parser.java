@@ -21,12 +21,15 @@ public class Parser {
     ArrayList<Token> tokens;
     int index;
 
+    public Parser(CharBuffer source, ArrayList<Token> tokens, int index) {
+        this.source = source;
+        this.tokens = tokens;
+        this.index = index;
+    }
+
     // Creates a copy of the current parser state.
     public Parser branch() {
-        Parser branch = new Parser();
-        branch.tokens = tokens;
-        branch.index = index;
-        return branch;
+        return new Parser(source, tokens, index);
     }
     // updates the current parser state to that of a branched parser.
     public void join(Parser branch) {
