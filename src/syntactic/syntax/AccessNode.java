@@ -5,8 +5,8 @@ import lexical.Location;
 import java.nio.CharBuffer;
 
 public class AccessNode extends AstNode {
-    AstNode source;
-    CharBuffer field;
+    public AstNode source;
+    public CharBuffer field;
 
     public AccessNode(Location location, AstNode source, CharBuffer field) {
         super(location);
@@ -15,7 +15,7 @@ public class AccessNode extends AstNode {
     }
 
     @Override
-    public <T> T visit(Visitor<T> visitor) {
+    public <T, E extends Throwable> T visit(Visitor<T, E> visitor) throws E{
         return visitor.visitAccess(this);
     }
 }

@@ -21,4 +21,9 @@ public record Location(int line, int column) {
     public String toString() {
         return "[" + line + ":" + column + "]";
     }
+
+    public boolean further(Location prior) {
+        return  this.line > prior.line
+            || (this.line >= prior.line && this.column > prior.column);
+    }
 }

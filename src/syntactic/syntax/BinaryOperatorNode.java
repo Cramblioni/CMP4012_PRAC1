@@ -4,9 +4,9 @@ import lexical.Location;
 import lexical.Tag;
 
 public class BinaryOperatorNode extends AstNode {
-    Tag operator;
-    AstNode lhs;
-    AstNode rhs;
+    public Tag operator;
+    public AstNode lhs;
+    public AstNode rhs;
 
     public BinaryOperatorNode(Location location, Tag operator, AstNode lhs, AstNode rhs) {
         super(location);
@@ -16,7 +16,7 @@ public class BinaryOperatorNode extends AstNode {
     }
 
     @Override
-    public <T> T visit(Visitor<T> visitor) {
+    public <T, E extends Throwable> T visit(Visitor<T, E> visitor) throws E {
         return visitor.visitBinaryOperator(this);
     }
 }
