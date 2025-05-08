@@ -46,7 +46,6 @@ Grammar:
                  | <location> "(" [<expression> ["," <expression>]*] ")";
 
 <location> ::= <location> "." <identifier>
-             | <location> "[" <expression> "]"
              | <identifier>;
 
 <identifier> ::= Internal Definition ;
