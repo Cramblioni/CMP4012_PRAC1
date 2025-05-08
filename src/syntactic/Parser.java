@@ -78,6 +78,22 @@ public class Parser {
                 source.subSequence(tok.start() + 1, tok.end() - 1).toString()
         );
     }
+    public BooleanNode pullBoolean() throws ParserError {
+        noEOF();
+        final Token literal = peek();
+        if (literal.tag() != Tag.True && literal.tag() != Tag.False) {
+            throw new ParserError(
+                    Location.atIndex(source, literal.start()),
+                    "Expected either `true`/`false`"
+            );
+        }
+        final boolean value = literal.tag() == Tag.True;
+        consume();
+        return new BooleanNode(
+                Location.atIndex(source, literal.start()),
+                value
+        );
+    }
     public AstNode pullLiteral() throws ParserError {
         ParserError error = null;
 
