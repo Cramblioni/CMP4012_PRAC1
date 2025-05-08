@@ -35,18 +35,20 @@ public class Parser {
 
     private Boolean atEnd() {return index >= tokens.size();}
 
-    public Token peek() {
+    public Token peek() throws ParserError {
+        noEOF();
         return tokens.get(index);
     }
 
-    public Token consume() {
+    public Token consume() throws ParserError {
+        noEOF();
         final Token result = tokens.get(index);
         index += 1;
         return result;
     }
 
     private void noEOF() throws ParserError {
-        if (atEnd()) { return; }
+        if (!atEnd()) { return; }
         throw new ParserError(
                 Location.atIndex(source, source.length()),
                 "Unexpected EOF"
@@ -54,7 +56,6 @@ public class Parser {
     }
 
     public NumberNode pullNumber() throws ParserError {
-        noEOF();
         final Location loc = Location.atIndex(source, peek().start());
         if (peek().tag() != Tag.Number) {
             throw new ParserError(loc,"Expected number literal");
@@ -66,7 +67,6 @@ public class Parser {
         return new NumberNode(loc, value);
     }
     public StringNode pullString() throws ParserError {
-        noEOF();
         final Location loc = Location.atIndex(source, peek().start());
         if (peek().tag() != Tag.String) {
             throw new ParserError(loc,"Expected string literal");
@@ -77,7 +77,6 @@ public class Parser {
         );
     }
     public BooleanNode pullBoolean() throws ParserError {
-        noEOF();
         final Token literal = peek();
         if (literal.tag() != Tag.True && literal.tag() != Tag.False) {
             throw new ParserError(
@@ -109,7 +108,6 @@ public class Parser {
     }
 
     public IdentifierNode pullIdentifier() throws ParserError {
-        noEOF();
         final Location loc = Location.atIndex(source, peek().start());
         if (peek().tag() != Tag.Number) {
             throw new ParserError(loc,"Expected identifier");
@@ -155,7 +153,6 @@ public class Parser {
                 Parser branch = branch();
                 branch.consume();
                 final AstNode inner = branch.pullExpression();
-                branch.noEOF();
                 final Token closing = branch.consume();
                 if (closing.tag() != Tag.CloseParenthesis) {
                     throw new ParserError(
@@ -245,7 +242,6 @@ public class Parser {
 
     public AstNode pullVariableDeclaration() throws ParserError {
         Parser branch = branch();
-        branch.noEOF();
         if (branch.peek().tag() != Tag.VarKeyword) {
             throw new ParserError(
                     Location.atIndex(source, branch.peek().start()),
@@ -253,7 +249,6 @@ public class Parser {
             );
         }
         final int start = branch.consume().start();
-        branch.noEOF();
         final Token identifier = branch.consume();
         if (identifier.tag() != Tag.Identifier) {
             throw new ParserError(
@@ -261,7 +256,6 @@ public class Parser {
                     "Expected an identifier"
             );
         }
-        branch.noEOF();
         if (branch.peek().tag() != Tag.Assign) {
             join(branch);
             return new VariableDeclarationNode(
@@ -270,7 +264,6 @@ public class Parser {
             );
         }
         consume();
-        branch.noEOF();
         final AstNode value = branch.pullExpression();
         join(branch);
         return new VariableDeclarationAndAssignmentNode(
@@ -282,9 +275,7 @@ public class Parser {
 
     public AstNode pullAssignment() throws ParserError {
         Parser branch = branch();
-        branch.noEOF();
         final AstNode location = branch.pullLocation();
-        branch.noEOF();
         if (branch.peek().tag() != Tag.Assign) {
             throw new ParserError(
                     Location.atIndex(source, branch.peek().start()),
@@ -292,7 +283,6 @@ public class Parser {
             );
         }
         final Token focus = branch.consume();
-        branch.noEOF();
         final AstNode value = branch.pullExpression();
         join(branch);
         return new AssignmentNode(
@@ -304,7 +294,6 @@ public class Parser {
 
     public AstNode pullImport() throws ParserError {
         Parser branch = branch();
-        branch.noEOF();
         final Token start = branch.consume();
         if (start.tag() != Tag.ImportKeyword) {
             throw new ParserError(
@@ -312,7 +301,6 @@ public class Parser {
                     "Expected `Import`"
             );
         }
-        branch.noEOF();
         final Token source = consume();
         if (source.tag() != Tag.String) {
             throw new ParserError(
@@ -320,7 +308,6 @@ public class Parser {
                     "Expected string literal"
             );
         }
-        branch.noEOF();
         final Token identifier = consume();
         if (identifier.tag() != Tag.String) {
             throw new ParserError(
@@ -338,7 +325,6 @@ public class Parser {
 
     public  AstNode pullIf() throws ParserError {
         Parser branch = branch();
-        branch.noEOF();
         final Token start = branch.consume();
         if (start.tag() != Tag.IfKeyword) {
             throw new ParserError(
@@ -346,9 +332,7 @@ public class Parser {
                     "Expected `if` keyword"
             );
         }
-        branch.noEOF();
         final AstNode condition = branch.pullExpression();
-        branch.noEOF();
         final AstNode body = branch.pullBlock();
         if (branch.peek().tag() != Tag.ElseKeyword) {
             join(branch);
@@ -359,7 +343,6 @@ public class Parser {
             );
         }
         branch.consume();
-        branch.noEOF();
         final AstNode elseCase = branch.pullBlock();
         join(branch);
         return new IfElseNode(
@@ -372,7 +355,6 @@ public class Parser {
 
     public AstNode pullBlock() throws ParserError {
         Parser branch = branch();
-        branch.noEOF();
         ArrayList<AstNode> statements = new ArrayList<AstNode>();
         final Token start = branch.consume();
         if (start.tag() != Tag.OpenBrace) {
@@ -381,9 +363,7 @@ public class Parser {
                     "Expected {"
             );
         }
-        branch.noEOF();
         while (branch.peek().tag() != Tag.CloseBrace) {
-            branch.noEOF();
             statements.add(branch.pullStatement());
         }
         branch.consume();
@@ -411,7 +391,6 @@ public class Parser {
             accumulator = ParserError.accumulate(accumulator, e);
         }
 
-        branch.noEOF();
         if (branch.peek().tag() != Tag.Semicolon) {
             throw new ParserError(
                     Location.atIndex(source,branch.consume().start()),
@@ -455,7 +434,6 @@ public class Parser {
         } catch (ParserError e) {
             accumulator = ParserError.accumulate(accumulator, e);
         }
-        branch.noEOF();
         if (branch.peek().tag() != Tag.Semicolon) {
             throw new ParserError(
                     Location.atIndex(source,branch.consume().start()),
