@@ -36,7 +36,7 @@ public class Parser {
         index = Math.max(index, branch.index);
     }
 
-    private Boolean atEnd() {return index >= tokens.size();}
+    public Boolean atEnd() {return index >= tokens.size();}
 
     public Token peek() throws ParserError {
         noEOF();
@@ -137,11 +137,48 @@ public class Parser {
         return accumulator;
     }
 
+    private boolean shouldContinueFuncArgs() throws ParserError {
+        if (peek().tag() == Tag.Comma) {
+            consume();
+            return true;
+        }
+        return false;
+    }
+
     public AstNode pullExpression4() throws ParserError {
         ParserError accumulator = null;
 
         // TODO: Invocation
-        try { return pullLocation(); }
+        try {
+            Parser branch = branch();
+            AstNode location = branch.pullLocation();
+            if (branch.peek().tag() != Tag.OpenParenthesis) {
+                join(branch);
+                return location;
+            }
+            // prepare for hell :)
+            final Token openParen = branch.consume();
+            ArrayList<AstNode> arguments = new ArrayList<AstNode>();
+            do {
+                if (branch.peek().tag() == Tag.CloseParenthesis) {
+                    break;
+                }
+                arguments.add(branch.pullExpression());
+            } while (shouldContinueFuncArgs());
+            if (branch.peek().tag() != Tag.CloseParenthesis) {
+                throw new ParserError(
+                        Location.atIndex(source, branch.peek().start()),
+                        "Expected `)` after function arguments"
+                );
+            }
+            branch.consume();
+            join(branch);
+            return new CallNode(
+                    Location.atIndex(source, openParen.start()),
+                    location,
+                    arguments.toArray(new AstNode[0])
+            );
+        }
         catch (ParserError e) {
             accumulator = ParserError.accumulate(accumulator, e);
         }

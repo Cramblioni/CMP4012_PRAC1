@@ -23,6 +23,7 @@ public enum Tag {
     String,
 
     Dot,
+    Comma,
 
     Plus,
     Minus,
