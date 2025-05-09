@@ -21,4 +21,5 @@ public class BaseVisitor<T, E extends Throwable> implements Visitor<T, E> {
     public T visitAssignment(AssignmentNode node) throws E { throw base_exception; }
     public T visitBoolean(BooleanNode node) throws E { throw base_exception; }
     public T visitCall(CallNode node) throws E { throw base_exception; }
+    public T visitReturn(ReturnNode node) throws E { throw base_exception; }
 }
