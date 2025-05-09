@@ -1,11 +1,19 @@
 package evaluation;
 
-public class BodyVisitor extends BaseVisitor {
-    Context module;
-    Context local;
+import syntactic.syntax.AstNode;
+import syntactic.syntax.BlockNode;
+
+public class BodyVisitor extends StatementVisitor {
 
     public BodyVisitor(Context module, Context local) {
-        this.module = module;
-        this.local = local;
+        super(module, local);
+    }
+
+    @Override
+    public BaseValue visitBlock(BlockNode node) throws DataError {
+        for (AstNode subs : node.statements) {
+            subs.visit(this);
+        }
+        return null;
     }
 }

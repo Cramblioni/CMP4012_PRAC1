@@ -41,11 +41,12 @@ public class ExpressionVisitor extends  BaseVisitor<BaseValue, DataError> {
                         args[i]
                 );
             }
-            ExpressionVisitor forfunc = new BodyVisitor(module, sub);
+            BodyVisitor forfunc = new BodyVisitor(module, sub);
             func.decl.body.visit(forfunc);
         }
         if (funcdat instanceof JavaFuncWrapper func) {
             return func.doCall(args);
         }
+        throw new DataError();
     }
 }
