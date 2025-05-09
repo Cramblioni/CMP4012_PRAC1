@@ -29,6 +29,7 @@ public class Parser {
 
     // Creates a copy of the current parser state.
     public Parser branch() {
+        System.out.println("branching");
         return new Parser(source, tokens, index);
     }
     // updates the current parser state to that of a branched parser.
@@ -59,6 +60,7 @@ public class Parser {
     }
 
     public NumberNode pullNumber() throws ParserError {
+        System.out.println("Entering Number");
         final Location loc = Location.atIndex(source, peek().start());
         if (peek().tag() != Tag.Number) {
             throw new ParserError(loc,"Expected number literal");
@@ -70,6 +72,7 @@ public class Parser {
         return new NumberNode(loc, value);
     }
     public StringNode pullString() throws ParserError {
+        System.out.println("Entering String");
         final Location loc = Location.atIndex(source, peek().start());
         if (peek().tag() != Tag.String) {
             throw new ParserError(loc,"Expected string literal");
@@ -80,6 +83,7 @@ public class Parser {
         );
     }
     public BooleanNode pullBoolean() throws ParserError {
+        System.out.println("Entering Boolean");
         final Token literal = peek();
         if (literal.tag() != Tag.True && literal.tag() != Tag.False) {
             throw new ParserError(
@@ -95,6 +99,7 @@ public class Parser {
         );
     }
     public AstNode pullLiteral() throws ParserError {
+        System.out.println("Entering Literal");
         ParserError accumulator = null;
 
         try {return pullNumber();}
@@ -111,16 +116,20 @@ public class Parser {
     }
 
     public IdentifierNode pullIdentifier() throws ParserError {
+        System.out.println("Entering Identifier");
         final Location loc = Location.atIndex(source, peek().start());
-        if (peek().tag() != Tag.Number) {
+        System.out.println("Got" + peek().tag());
+        if (peek().tag() != Tag.Identifier) {
             throw new ParserError(loc,"Expected identifier");
         }
         final Token tok = consume();
+        System.out.println("Leaving identifier");
         return new IdentifierNode(loc, source.subSequence(tok.start(), tok.end()));
     }
 
     // Expressions and Expression Components
     public AstNode pullLocation() throws ParserError {
+        System.out.println("Entering Location");
         Parser branch = branch();
         AstNode accumulator = branch.pullIdentifier();
         while (branch.peek().tag() == Tag.Dot) {
@@ -145,6 +154,7 @@ public class Parser {
     }
 
     public AstNode pullExpression4() throws ParserError {
+        System.out.println("Entering Expression 4");
         ParserError accumulator = null;
 
         try {
@@ -219,6 +229,7 @@ public class Parser {
     }
 
     public AstNode pullExpression3() throws ParserError {
+        System.out.println("Entering Expression 3");
         Parser branch = branch();
         AstNode accumulate = branch.pullExpression4();
         if (branch.peek().tag() == Tag.Star || branch.peek().tag() == Tag.Slash) {
@@ -236,6 +247,7 @@ public class Parser {
     }
 
     public AstNode pullExpression2() throws ParserError {
+        System.out.println("Entering 2");
         Parser branch = branch();
         AstNode accumulate = branch.pullExpression3();
         if (branch.peek().tag() == Tag.Plus || branch.peek().tag() == Tag.Minus) {
@@ -253,6 +265,7 @@ public class Parser {
     }
 
     public AstNode pullExpression() throws ParserError {
+        System.out.println("Entering Expression");
         final Tag[] Operators = {
                 Tag.Equal, Tag.NotEqual,
                 Tag.GreaterEqual, Tag.Greater,
@@ -279,6 +292,7 @@ public class Parser {
     // This will be handled via `pullStatement` and `pullDeclaration`
 
     public AstNode pullVariableDeclaration() throws ParserError {
+        System.out.println("Entering Var Def");
         Parser branch = branch();
         if (branch.peek().tag() != Tag.VarKeyword) {
             throw new ParserError(
@@ -312,6 +326,7 @@ public class Parser {
     }
 
     public AstNode pullAssignment() throws ParserError {
+        System.out.println("Entering Assignment");
         Parser branch = branch();
         final AstNode location = branch.pullLocation();
         if (branch.peek().tag() != Tag.Assign) {
@@ -331,6 +346,7 @@ public class Parser {
     }
 
     public AstNode pullImport() throws ParserError {
+        System.out.println("Entering Import");
         Parser branch = branch();
         final Token start = branch.consume();
         if (start.tag() != Tag.ImportKeyword) {
@@ -362,6 +378,7 @@ public class Parser {
     }
 
     public  AstNode pullIf() throws ParserError {
+        System.out.println("Entering If");
         Parser branch = branch();
         final Token start = branch.consume();
         if (start.tag() != Tag.IfKeyword) {
@@ -392,6 +409,7 @@ public class Parser {
     }
 
     public AstNode pullFunctionDefinition() throws ParserError {
+        System.out.println("Entering Func Def");
         Parser branch = branch();
         final Token head = branch.consume();
         if (head.tag() != Tag.FnKeyword) {
@@ -400,7 +418,6 @@ public class Parser {
                     "Expected `fn`"
             );
         }
-        branch.consume();
         final CharBuffer name = branch.pullIdentifier().identifier;
         if (branch.peek().tag() != Tag.OpenParenthesis) {
             throw new ParserError(
@@ -408,6 +425,7 @@ public class Parser {
                     "Expected `(`"
             );
         }
+        branch.consume();
         ArrayList<CharBuffer> arguments = new ArrayList<CharBuffer>();
         do {
             if (branch.peek().tag() == Tag.CloseParenthesis) {
@@ -432,7 +450,25 @@ public class Parser {
         );
     }
 
+    public AstNode pullReturn() throws ParserError {
+        Parser branch = branch();
+        final Token head = branch.consume();
+        if (head.tag() != Tag.ReturnKeyword) {
+            throw new ParserError(
+                    Location.atIndex(source, head.start()),
+                    "Expected `return`"
+            );
+        }
+        final AstNode value = branch.pullExpression();
+        join(branch);
+        return new ReturnNode(
+                Location.atIndex(source, head.start()),
+                value
+        );
+    }
+
     public AstNode pullWhile() throws ParserError {
+        System.out.println("Entering While");
         Parser branch = branch();
         final Token head = branch.consume();
         if (head.tag() != Tag.WhileKeyword) {
@@ -453,6 +489,7 @@ public class Parser {
     }
 
     public AstNode pullBlock() throws ParserError {
+        System.out.println("Entering Block");
         Parser branch = branch();
         ArrayList<AstNode> statements = new ArrayList<AstNode>();
         final Token start = branch.consume();
@@ -482,9 +519,8 @@ public class Parser {
         } catch (ParserError e) {
             accumulator = ParserError.accumulate(accumulator, e);
         }
-
         try {
-            if (declaration != null) {
+            if (declaration == null) {
                 declaration = branch.pullImport();
             }
         } catch (ParserError e) {
@@ -492,21 +528,21 @@ public class Parser {
         }
 
         try {
-            if (declaration != null) {
+            if (declaration == null) {
                 declaration = branch.pullFunctionDefinition();
             }
         } catch (ParserError e) {
             accumulator = ParserError.accumulate(accumulator, e);
         }
 
+        if (accumulator != null) {
+            throw accumulator;
+        }
         if (branch.peek().tag() != Tag.Semicolon) {
             throw new ParserError(
                     Location.atIndex(source,branch.consume().start()),
                     "Expected `;`"
             );
-        }
-        if (accumulator != null) {
-            throw accumulator;
         }
         branch.consume();
         join(branch);
@@ -514,6 +550,7 @@ public class Parser {
     }
 
     public AstNode pullStatement() throws ParserError {
+        System.out.println("Entering Statement");
         ParserError accumulator = null;
         try {
             return pullDeclaration();
@@ -544,7 +581,15 @@ public class Parser {
         }
         try {
             if (statement != null) {
+                statement = branch.pullReturn();
+            }
+        } catch (ParserError e) {
+            accumulator = ParserError.accumulate(accumulator, e);
+        }
+        try {
+            if (statement != null) {
                 statement = branch.pullExpression();
+                statement = new ExpressionNode(statement.location, statement);
             }
         } catch (ParserError e) {
             accumulator = ParserError.accumulate(accumulator, e);

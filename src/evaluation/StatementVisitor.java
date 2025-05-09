@@ -34,7 +34,8 @@ public class StatementVisitor extends BaseVisitor<BaseValue, DataError> {
     @Override
     public BaseValue visitAssignment(AssignmentNode node) throws DataError {
         ExpressionVisitor sub = new ExpressionVisitor(module, local);
-        local.put(node.target, node.value.visit(sub));
+        assert node.target instanceof IdentifierNode;
+        local.put(((IdentifierNode)node.target).identifier.toString(), node.value.visit(sub));
         return null;
     }
 
@@ -43,5 +44,6 @@ public class StatementVisitor extends BaseVisitor<BaseValue, DataError> {
         ExpressionVisitor sub = new ExpressionVisitor(module, local);
         BaseValue cond = node.condition.visit(sub);
         BodyVisitor limiter = new BodyVisitor(module, new Context(local));
+        throw new DataError();
     }
 }
