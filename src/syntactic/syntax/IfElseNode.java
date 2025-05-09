@@ -3,9 +3,9 @@ package syntactic.syntax;
 import lexical.Location;
 
 public class IfElseNode extends AstNode {
-    AstNode condition;
-    AstNode body;
-    AstNode altBody;
+    public AstNode condition;
+    public AstNode body;
+    public AstNode altBody;
 
     public IfElseNode(Location location, AstNode condition, AstNode body, AstNode altBody) {
         super(location);

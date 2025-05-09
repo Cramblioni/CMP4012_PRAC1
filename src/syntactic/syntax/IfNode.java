@@ -3,8 +3,8 @@ package syntactic.syntax;
 import lexical.Location;
 
 public class IfNode extends AstNode {
-    AstNode condition;
-    AstNode body;
+    public AstNode condition;
+    public AstNode body;
 
     public IfNode(Location location, AstNode condition, AstNode body) {
         super(location);

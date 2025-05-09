@@ -3,8 +3,8 @@ package syntactic.syntax;
 import lexical.Location;
 
 public class AssignmentNode extends AstNode {
-    AstNode target;
-    AstNode value;
+    public AstNode target;
+    public AstNode value;
 
     public AssignmentNode(Location location, AstNode target, AstNode value) {
         super(location);

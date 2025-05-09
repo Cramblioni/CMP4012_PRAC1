@@ -3,7 +3,7 @@ package syntactic.syntax;
 import lexical.Location;
 
 public class BlockNode extends AstNode {
-    AstNode[] statements;
+    public AstNode[] statements;
 
     public BlockNode(Location location, AstNode[] statements) {
         super(location);
