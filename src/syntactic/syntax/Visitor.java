@@ -18,4 +18,5 @@ public interface Visitor<T, E extends Throwable> {
     T visitAssignment(AssignmentNode node) throws E;
     T visitBoolean(BooleanNode node) throws E;
     T visitCall(CallNode node) throws E;
+    T visitReturn(ReturnNode node) throws E;
 }
